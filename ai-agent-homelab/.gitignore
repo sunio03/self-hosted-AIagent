@@ -1,0 +1,6 @@
+# Never commit firewall backups or secrets
+config*.xml
+*.key
+*.pem
+.env
+secrets/

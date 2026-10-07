@@ -1,0 +1,30 @@
+// Tailnet policy: default deny, admin laptop only.
+// Applied in the Tailscale admin console (Access controls -> JSON editor).
+{
+	// Named addresses
+	"hosts": {
+		"macbook": "<MACBOOK_TAILSCALE_IP>",
+		"agents":  "<VLAN_AGENTS_CIDR>",
+	},
+
+	"grants": [
+		// Admin laptop -> agent VLAN, SSH only
+		{"src": ["macbook"], "dst": ["agents"], "ip": ["tcp:22"]},
+
+		// Admin laptop -> all tailnet devices (Proxmox, OPNsense GUI, lab VMs), any port
+		{"src": ["macbook"], "dst": ["100.64.0.0/10"], "ip": ["*"]},
+	],
+
+	// Evaluated on every save; a failing test blocks the change
+	"tests": [
+		{
+			"src":    "<MACBOOK_TAILSCALE_IP>",
+			"accept": ["<AGENT_VM_IP>:22"],
+			"deny":   ["<AGENT_VM_IP>:80"],
+		},
+		{
+			"src":  "<ADMIN_DEVICE_TAILSCALE_IP>",
+			"deny": ["<AGENT_VM_IP>:22", "<PROXMOX_TAILSCALE_IP>:22"],
+		},
+	],
+}
